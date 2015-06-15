@@ -1,5 +1,5 @@
 ![alt tag](http://danielhaake.de/logoLokiReadme.png)
-<i>Version 1.10.16 - Release: Sword</i>
+<i>Version 1.11.20 - Release: Sharp Sword</i>
 <hr>
 <h2>Table of Content:</h2>
 <a href="#about">About</a><br />
@@ -53,7 +53,7 @@ example device (TP-Link TL-MR3020 with pivot root on USB flash drive and openWRT
 </ul>
 <hr>
 <h2>Privacy Mode</h2>
-<p>The privacy option takes care that every sniffed MAC address, ESSID and probe gets scrambled before it gets stored inside the database. The user input "signature" works as encryption key in the scrambling process. You can activate privacy by using the -p/--privacy option.</p>
+<p>The privacy option takes care that every sniffed MAC address, ESSID and probe gets scrambled before it gets stored inside the database. The user input "signature" works as a salt in the scrambling process. You can activate privacy by using the -p/--privacy option.</p>
 <hr>
 <h2>Silent Mode</h2>
 The two main aspects of the silent mode are that there is no console output generated and that all needed parameters are read in as command line parameters. You can run the program in this mode on your own or use it for crontab. The -pc/--print-crontab option helps you building the needed string and gives you instructions on how to make this program run automatically after startup.
