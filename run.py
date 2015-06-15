@@ -42,6 +42,14 @@ path = os.path.split(os.path.realpath(__file__))[0]
 silentString = 0
 
 
+def dbSelectCommit(statement):
+        connectionCursor.execute(statement)
+        return connectionCursor.fetchall()
+
+def dbChangeCommit(statement):
+        connectionCursor.execute(statement)
+        connection.commit()
+
 def createDatabaseFile(sig):
 	# check if copy file already exists
 	if os.path.isfile(path + "/data/" +  sig + dataFile):
@@ -230,28 +238,21 @@ else:
 		connectionCursor = connection.cursor()
 
 		# test if location is already in database
-		statement = "select ID from locations where country=\"" + country + "\" and zipcode=\"" + zipcode + "\" and city=\"" + city + "\" and street=\"" + street + "\" and streetnumber=\"" + streetnumber + "\""
-		connectionCursor.execute(statement)
-		inDB = connectionCursor.fetchall()		
+		inDB = dbSelectCommit("select ID from locations where country=\"" + country + "\" and zipcode=\"" + zipcode + "\" and city=\"" + city + "\" and street=\"" + street + "\" and streetnumber=\"" + streetnumber + "\"")
 
 		if len(inDB) == 0:
 			if offlineOrOnline == "offline":
-				statement = "insert into locations (country, zipcode, city, street, streetnumber, gpsl, gpsw, time) values (\"" + country + "\", \"" + zipcode + "\", \"" + city + "\", \"" + street + "\", \"" + streetnumber + "\", \"0\", \"0\", \"" + str(currentTimestamp) + "\")"
+				dbChangeCommit("insert into locations (country, zipcode, city, street, streetnumber, gpsl, gpsw, time) values (\"" + country + "\", \"" + zipcode + "\", \"" + city + "\", \"" + street + "\", \"" + streetnumber + "\", \"0\", \"0\", \"" + str(currentTimestamp) + "\")")
 			else:
 				# resolve gps coordinates from address
 				url = "http://maps.googleapis.com/maps/api/geocode/xml?address=" + urllib2.quote(country) + ",+" + urllib2.quote(zipcode) + ",+" + urllib2.quote(city) + ",+" + urllib2.quote(street) + ",+" + urllib2.quote(streetnumber) + "&sensor=false"
 				# extract GPS coordinates
 				res = myTool.streetToGps(url)
-				statement = "insert into locations (country, zipcode, city, street, streetnumber, gpsl, gpsw, time) values (\"" + country + "\", \"" + zipcode + "\", \"" + city + "\", \"" + street + "\", \"" + streetnumber + "\", \"" + res[1] + "\", \"" + res[0] + "\", \"" + str(currentTimestamp) + "\")"
+				dbChangeCommit("insert into locations (country, zipcode, city, street, streetnumber, gpsl, gpsw, time) values (\"" + country + "\", \"" + zipcode + "\", \"" + city + "\", \"" + street + "\", \"" + streetnumber + "\", \"" + res[1] + "\", \"" + res[0] + "\", \"" + str(currentTimestamp) + "\")")
 				if len(silentArray) == 0:
 					print myTool.green + "[+] " + myTool.stop + "Resolving GPS coordinates... (needs internet connection!)"
-			
-			connectionCursor.execute(statement)
-			connection.commit()    		
-		
-			statement = "SELECT ID FROM locations ORDER BY ID DESC LIMIT 1"
-			connectionCursor.execute(statement)
-			maxLocationId = connectionCursor.fetchall()[0][0]
+					
+			maxLocationId = dbSelectCommit("SELECT ID FROM locations ORDER BY ID DESC LIMIT 1")[0][0]
 		else:
 			maxLocationId = inDB[0][0]
 			if len(silentArray) == 0:
@@ -292,19 +293,13 @@ else:
 		connectionCursor = connection.cursor()		
 		
 		# test if location is already in database
-		statement = "select ID from locations where gpsl=\"" + gpsl + "\" and gpsw=\"" + gpsw + "\""
-		connectionCursor.execute(statement)
-		inDB = connectionCursor.fetchall()		
+		inDB = dbSelectCommit("select ID from locations where gpsl=\"" + gpsl + "\" and gpsw=\"" + gpsw + "\"")
 		
 		if len(inDB) == 0:
 			# save new location to database
-			statement = "insert into locations (country, zipcode, city, street, streetnumber, gpsl, gpsw, time) values (\"No entry.\", \"No entry.\", \"No entry.\", \"No entry.\", \"No entry.\", \"" + gpsl + "\", \"" + gpsw + "\", \"" + str(currentTimestamp) + "\")"	
-			connectionCursor.execute(statement)
-			connection.commit()
+			dbChangeCommit("insert into locations (country, zipcode, city, street, streetnumber, gpsl, gpsw, time) values (\"No entry.\", \"No entry.\", \"No entry.\", \"No entry.\", \"No entry.\", \"" + gpsl + "\", \"" + gpsw + "\", \"" + str(currentTimestamp) + "\")")
 		
-			statement = "SELECT ID FROM locations ORDER BY ID DESC LIMIT 1"
-			connectionCursor.execute(statement)
-			maxLocationId = connectionCursor.fetchall()[0][0]
+			maxLocationId = dbSelectCommit("SELECT ID FROM locations ORDER BY ID DESC LIMIT 1")[0][0]
 		else:
 			maxLocationId = inDB[0][0]
 			if silent == 0:
