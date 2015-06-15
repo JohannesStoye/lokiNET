@@ -148,7 +148,7 @@ def pktHandler(pkt):
 			# update last seen parameter
 			dbChangeCommit("UPDATE clientProbes SET timeLast='" + str(currentTimestamp) + "' WHERE clientMac='" + clientMac + "' AND probe='" + curSSID + "'")
 
-	# scan for accesspoints
+	# scan for access points
 	if pkt.haslayer(Dot11Beacon) or pkt.haslayer(Dot11ProbeResp):
 		currSSID = "dummy"
 		channel = "null"
@@ -165,7 +165,7 @@ def pktHandler(pkt):
 					channel = str(int(temp.info.encode("hex"), 16))
 
 					if silent == 0:
-						print myTool.green + "[+] " + myTool.stop + str(currentDateAndTime) + ": Discovered Accesspoint (" + str(len(ssids)) + "):"
+						print myTool.green + "[+] " + myTool.stop + str(currentDateAndTime) + ": Discovered access point (" + str(len(ssids)) + "):"
 					if privacy == 0:
 						bssid = pkt.getlayer(Dot11).addr3
 						if silent == 0:
