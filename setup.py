@@ -68,6 +68,12 @@ try:
 	print myTool.green + "[+] " + myTool.stop + "CHMOD(+x): cgi-bin/largemap.html -> Success!"
 except:
 	print myTool.fail + "[-] " + myTool.stop + "CHMOD(+x): cgi-bin/largemap.html -> FAIL!"
+try:
+        os.system("chmod 777 webfiles/config")
+        print myTool.green + "[+] " + myTool.stop + "CHMOD(777): webfiles/config -> Success!"
+except:
+        print myTool.fail + "[-] " + myTool.stop + "CHMOD(777): webfiles/config -> FAIL!"
+
 
 print myTool.green + "[+] " + myTool.stop + "All chmods set."
 print ""
