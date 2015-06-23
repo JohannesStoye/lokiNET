@@ -194,11 +194,11 @@ def pktHandler(pkt):
 
 					dbChangeCommit("insert into accesspoints (bssid, essid, channel, power, locationId, encryption, time) values (\"" + bssid + "\", \"" + currSSID + "\", \"" + channel + "\", \"" + power + "\", \"" + str(locationID) + "\", \"" + encryption + "\", \"" + str(currentTimestamp) + "\")")
 
+					ssids.add(pkt.getlayer(Dot11).addr3 + " " + currSSID)
 					break
 
 				# save SSID
 				if temp.ID == 0:
-					ssids.add(bssidEssidPair)
 					currSSID = temp.info
 					# save hidden ssids
 					for byte in bytearray(currSSID):
