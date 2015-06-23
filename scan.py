@@ -212,14 +212,14 @@ connection = sqlite3.connect(path + "/data/" + dataFile)
 connectionCursor = connection.cursor()
 
 # channel hopping
-channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 while True:
 	for i in channels:
-		os.system("iw dev " + sys.argv[1] + " set channel " + str(i))
+		os.system("iwconfig " + sys.argv[1] + " channel " + str(i))
 
 		currentTimestamp = time.time()
 		currentDateAndTime = datetime.datetime.fromtimestamp(currentTimestamp).strftime("%Y-%m-%d %H:%M:%S")
 
-		pkt = sniff(iface=interface, count=1, prn=pktHandler)
+		pkt = sniff(iface=interface, count=1, timeout=0.5, prn=pktHandler)
 connection.close()
 sys.exit(0)
