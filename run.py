@@ -20,12 +20,14 @@
 ########################################################################
 
 from engineClasses.tools import tools
+import getpass
 import os
 import sys
 import signal
 import time
 import sqlite3
 import urllib2
+import MySQLdb
 
 
 myTool = tools()
@@ -40,6 +42,12 @@ silentArray = []
 silent = 0
 path = os.path.split(os.path.realpath(__file__))[0]
 silentString = 0
+remoteOrLocal = "l"
+server = ""
+por = 3306
+username = ""
+password = ""
+database = "lokinet"
 
 
 def dbSelectCommit(statement):
@@ -55,7 +63,7 @@ def createDatabaseFile(sig):
 	if os.path.isfile(path + "/data/" +  sig + dataFile):
 		pass
 	else:
-		os.system("cp " + path + "/data/dataTemplate.db " + path + "/data/" + sig + dataFile)	
+		os.system("cp " + path + "/data/dataTemplate.db " + path + "/data/" + sig + dataFile)
 
 def ctrlc_handler(self, frm):
         if "-m" in sys.argv or "--monitor" in sys.argv:
@@ -175,7 +183,19 @@ else:
                 else:
 			if silent == 0:
 				print myTool.green + "[+]" + myTool.stop + " Online mode selected."
-                        offlineOrOnline = "online"
+				# check if a remote database or local should be used
+				remoteOrLocal = raw_input("# Use (r)emote or (l)ocal databse?: ")
+				if remoteOrLocal == "r":
+					print myTool.green + "[+]" + myTool.stop + " Remote database selected."
+					print "[?] MySQL connection properties:"
+					server = raw_input("# Server address: ")
+					por = int(raw_input("# Port number: "))
+					username = raw_input("# Username: ")
+					password = getpass.getpass()
+				else:
+					print myTool.green + "[+]" + myTool.stop + " Local database selected."
+
+			offlineOrOnline = "online"
 
 	# direct gps input
         if "-gps" in sys.argv or "--gps" in sys.argv:
@@ -216,6 +236,12 @@ else:
 			street = silentArray[3]
 			streetnumber = silentArray[4]
 			signature = silentArray[5]
+			if silentArray[6] == "r":
+				remoteOrLocal = "r"
+				server = silentArray[7]
+				username = silentArray[8]
+				password = silentArray[9]
+				por = int(silentArray[11])
 		
 		if silentString == 1:
 			mon = " "
@@ -227,14 +253,17 @@ else:
 				priv = " -p "
 			if offlineOrOnline != "offline":
 				offOn = " -on "
-			print "\n" + myTool.green + "[+] Crontab String: " + myTool.stop + "@reboot python " + path + "/run.py " + interface + mon + offOn + priv + "-s " + country + " " + zipcode + " " + city + " " + street + " " + streetnumber + " " + signature
+			print "\n" + myTool.green + "[+] Crontab String: " + myTool.stop + "@reboot python " + path + "/run.py " + interface + mon + offOn + priv + "-s " + country + " " + zipcode + " " + city + " " + street + " " + streetnumber + " " + signature + " " + remoteOrLocal + " " + server + " " + username + " " + password + " " + database + " " + str(por)
 			print myTool.green + "[+]" + myTool.stop + " This string can be added to your devices crontab (crontab -e) to run it automatically on startup."
 			sys.exit(0)
 		
 		createDatabaseFile(signature)
 		
 		# save new location to database
-		connection = sqlite3.connect(path + "/data/" + signature + "Data.db")
+		if remoteOrLocal == "l":
+			connection = sqlite3.connect(path + "/data/" + signature + "Data.db")
+		else:
+                        connection = MySQLdb.connect(host=server, user=username, passwd=password, db=database, port=por)
 		connectionCursor = connection.cursor()
 
 		# test if location is already in database
@@ -259,7 +288,7 @@ else:
 				print myTool.warning + "[!] " + myTool.stop + "Location already exists in database. Using saved entry instead of saving a new one."
 		
 		# execute scan script
-		os.system(path + "/scan.py " + interface + " " + signature + " " + str(maxLocationId) + " " + str(privacy) + " " + str(silent))
+		os.system(path + "/scan.py " + interface + " " + signature + " " + str(maxLocationId) + " " + str(privacy) + " " + str(silent) + " " + remoteOrLocal + " " + server + " " + username + " " + password + " " + database + " " + str(por))
 	else:
 		# direct GPS input
 		if silent == 0:
@@ -273,6 +302,13 @@ else:
 			gpsl = silentArray[0]
 			gpsw = silentArray[1]
 			signature = silentArray[2]
+			if silentArray[3] == "r":
+				remoteOrLocal = "r"
+                        	server = silentArray[4]
+                                username = silentArray[5]
+                                password = silentArray[6]
+				por = int(silentArray[8])
+
 		
 		if silentString == 1:
 			mon = " "
@@ -284,12 +320,15 @@ else:
 				priv = " -p "	
 			if offlineOrOnline != "offline":
 				offOn = " -on "			
-			print "\n" + myTool.green + "[+] Crontab String: " + myTool.stop + "@reboot python " + path + "/run.py " + interface + mon + offOn + priv + "-gps -s " + gpsl + " " + gpsw + " " + signature
+			print "\n" + myTool.green + "[+] Crontab String: " + myTool.stop + "@reboot python " + path + "/run.py " + interface + mon + offOn + priv + "-gps -s " + gpsl + " " + gpsw + " " + signature + " " + remoteOrLocal + " " + server + " " + username + " " + password + " " + database + " " + str(por)
 			print myTool.green + "[+]" + myTool.stop + " This string can be added to your devices crontab (crontab -e) to run it automatically on startup."
 			sys.exit(0)		
 		
 		createDatabaseFile(signature)
-		connection = sqlite3.connect(path + "/data/" + signature + "Data.db")
+		if remoteOrLocal == "l":
+			connection = sqlite3.connect(path + "/data/" + signature + "Data.db")
+		else:
+		 	connection = MySQLdb.connect(host=server, user=username, passwd=password, db=database, port=por)
 		connectionCursor = connection.cursor()		
 		
 		# test if location is already in database
@@ -306,4 +345,4 @@ else:
 				print myTool.warning + "[!] " + myTool.stop + "Location already exists in database. Using saved entry instead of saving a new one."
 		
 		# execute scan script
-		os.system(path + "/scan.py " + interface + " " + signature + " " + str(maxLocationId) + " " + str(privacy) + " " + str(silent))
+		os.system(path + "/scan.py " + interface + " " + signature + " " + str(maxLocationId) + " " + str(privacy) + " " + str(silent) + " " + remoteOrLocal + " " + server + " " + username + " " + password + " " + database + " " + str(por))

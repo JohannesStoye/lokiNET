@@ -19,6 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ########################################################################
 
+import MySQLdb
 import sys
 import os
 from engineClasses.tools import tools
@@ -37,6 +38,7 @@ interface = sys.argv[1]
 signature = sys.argv[2]
 privacy = int(sys.argv[4])
 silent = int(sys.argv[5])
+remoteOrLocal = sys.argv[6]
 dataFile = signature + "Data.db"
 locationID = int(sys.argv[3])
 ssids = set()
@@ -208,7 +210,11 @@ def pktHandler(pkt):
 			temp = temp.payload
 
 # connect to local database file
-connection = sqlite3.connect(path + "/data/" + dataFile)
+if remoteOrLocal == "l":
+	connection = sqlite3.connect(path + "/data/" + dataFile)
+else:
+	connection = MySQLdb.connect(host=sys.argv[7], user=sys.argv[8], passwd=sys.argv[9], db=sys.argv[10], port=int(sys.argv[11]))
+
 connectionCursor = connection.cursor()
 
 # channel hopping
