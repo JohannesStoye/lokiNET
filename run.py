@@ -47,7 +47,7 @@ server = ""
 por = 3306
 username = ""
 password = ""
-database = "lokinet"
+database = ""
 
 
 def dbSelectCommit(statement):
@@ -92,6 +92,7 @@ else:
 		print "webinterface:" +  myTool.blue + "\t[-web|--webinterface]" + myTool.stop + "\tStart webserver to analyse collected data"
 
 		print "Database:" +  myTool.blue + "\t[-me|--merge]" + myTool.stop + "\t\tMerge different database files to one"		
+		print myTool.blue + "\t\t[-ct|--createTables]" + myTool.stop + "\tCreate database tables for a remote MySQL server"
 
 		print "Silent Mode:" + myTool.blue + "\t[-pc|--print-crontab]" + myTool.stop + "\tJust creates a silent mode string. You can use it for adding the program to your cronjobs."		
 		print myTool.blue + "\t\t[-s|--silent]" + myTool.stop + "\t\tEnable silent mode. In silent mode no console output will be generated.\n\t\t\t\t\tTo make sure the script works fine you need to put the silent flag at the end of the parameters followed by all needed input."		
@@ -100,6 +101,44 @@ else:
 		print myTool.blue + "\t\t[-m|--monitor]" + myTool.stop + "\t\tChange mode of selected interface to \"monitor\""
 		print myTool.blue + "\t\t[-p|--privacy]" + myTool.stop + "\t\tIf you set this parameter all collected personal data will be scrambled."
 		print ""
+		sys.exit()
+
+	# create mysql database tables for a remote database
+	if "-ct" in sys.argv or "--createTables" in sys.argv:
+		print myTool.green + "[+] " + myTool.stop + "Create MySQL tables on a remote server selected."
+		print "[?] Type in the server parameters."
+		server = raw_input("# Server address: ")
+                por = int(raw_input("# Port number: "))
+                database = raw_input("# Database: ")
+                username = raw_input("# Username: ")
+                password = getpass.getpass()
+		
+		# create tables
+		connection = MySQLdb.connect(host=server, user=username, passwd=password, db=database, port=por)
+                connectionCursor = connection.cursor()		
+		try:
+			connectionCursor.execute("create table accesspoints (ID int not null auto_increment, bssid varchar(50) not null, essid text not null, channel int not null, power int not null, locationId int not null, encryption text, time text, primary key (ID))")
+			print myTool.green + "[+] " + myTool.stop + "Table accesspoints created."
+		except:
+			print myTool.fail + "[-] " + myTool.stop + "ERROR creating table for access points."
+		try:
+			connectionCursor.execute("create table clientProbes (ID int not null auto_increment, clientMac varchar(8) not null, probe text not null, locationId int not null, power int, timeFirst text not null, timeLast text not null, primary key(ID))")
+			print myTool.green + "[+] " + myTool.stop + "Table clientProbes created."
+		except:
+			print myTool.fail + "[-] " + myTool.stop + "ERROR creating table for client probes."
+		try:
+			connectionCursor.execute("create table connections (ID int auto_increment, macOne varchar(8) not null, macTwo varchar(8) not null, power int not null, locationID int not null, timeFirst text not null, timeLast text not null, primary key(ID))")
+			print myTool.green + "[+] " + myTool.stop + "Table connections created."
+		except:
+			print myTool.fail + "[-] " + myTool.stop + "ERROR creating table for connections."
+		try:
+			connectionCursor.execute("create table locations (ID int auto_increment, country text not null, zipcode text not null, city text not null, street text not null, streetnumber text not null, gpsl text, gpsw text, time text not null, primary key(ID))")
+			print myTool.green + "[+] " + myTool.stop + "Table locations created."
+		except:
+			print myTool.fail + "[-] " + myTool.stop + "ERROR creating table for locations."
+		connectionCursor.close()
+
+		print myTool.green + "[+] " + myTool.stop + "Finished."
 		sys.exit()
 
 	# print silent string
@@ -190,6 +229,7 @@ else:
 					print "[?] MySQL connection properties:"
 					server = raw_input("# Server address: ")
 					por = int(raw_input("# Port number: "))
+					database = raw_input("# Database: ")
 					username = raw_input("# Username: ")
 					password = getpass.getpass()
 				else:
