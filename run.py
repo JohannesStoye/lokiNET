@@ -281,6 +281,7 @@ else:
 				server = silentArray[7]
 				username = silentArray[8]
 				password = silentArray[9]
+				database = silentArray[10]
 				por = int(silentArray[11])
 		
 		if silentString == 1:
@@ -347,6 +348,7 @@ else:
                         	server = silentArray[4]
                                 username = silentArray[5]
                                 password = silentArray[6]
+				database = silentArray[7]
 				por = int(silentArray[8])
 
 		
