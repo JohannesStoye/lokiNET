@@ -165,6 +165,7 @@ def pktHandler(pkt):
 					power = extractTransmissionPower(pkt)
 
 					channel = str(int(temp.info.encode("hex"), 16))
+					currSSIDScrambled = ""
 
 					if silent == 0:
 						print myTool.green + "[+] " + myTool.stop + str(currentDateAndTime) + ": Discovered access point (" + str(len(ssids)) + "):"
@@ -178,9 +179,9 @@ def pktHandler(pkt):
 						if silent == 0:
 							print myTool.green + "[+] " + myTool.stop + "scrambled BSSID --> " + bssid
 						if currSSID != "[hidden]":
-							currSSID = md5.new(signature + currSSID).hexdigest()
+							currSSIDScrambled = md5.new(signature + currSSID).hexdigest()
 						if silent == 0:
-							print myTool.green + "[+] " + myTool.stop + "scrambled ESSID --> " + currSSID
+							print myTool.green + "[+] " + myTool.stop + "scrambled ESSID --> " + currSSIDScrambled
 					if silent == 0:
 						print myTool.green + "[+] " + myTool.stop + "channel --> " + channel
 						print myTool.green + "[+] " + myTool.stop + "power --> " + power
@@ -194,7 +195,10 @@ def pktHandler(pkt):
 						print myTool.green + "[+] " + myTool.stop + "encryption --> " + encryption
 						print ""
 
-					dbChangeCommit("insert into accesspoints (bssid, essid, channel, power, locationId, encryption, time) values (\"" + bssid + "\", \"" + currSSID + "\", \"" + channel + "\", \"" + power + "\", \"" + str(locationID) + "\", \"" + encryption + "\", \"" + str(currentTimestamp) + "\")")
+					if privacy == 0:
+						dbChangeCommit("insert into accesspoints (bssid, essid, channel, power, locationId, encryption, time) values (\"" + bssid + "\", \"" + currSSID + "\", \"" + channel + "\", \"" + power + "\", \"" + str(locationID) + "\", \"" + encryption + "\", \"" + str(currentTimestamp) + "\")")
+					else:
+						dbChangeCommit("insert into accesspoints (bssid, essid, channel, power, locationId, encryption, time) values (\"" + bssid + "\", \"" + currSSIDScrambled + "\", \"" + channel + "\", \"" + power + "\", \"" + str(locationID) + "\", \"" + encryption + "\", \"" + str(currentTimestamp) + "\")")
 
 					ssids.add(pkt.getlayer(Dot11).addr3 + " " + currSSID)
 					break
