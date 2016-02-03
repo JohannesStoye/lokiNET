@@ -1,5 +1,5 @@
 ![alt tag](http://danielhaake.de/logoLokiReadme.png)
-<i>Version 1.11.20 - Release: Sharp Sword</i>
+<i>Version 1.12.25 - Release: Speer</i>
 <hr>
 <h2>Table of Content:</h2>
 <a href="#about">About</a><br />
